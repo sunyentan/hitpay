@@ -55,36 +55,42 @@ app.get('/create-payment', async (req, res) => {
     }
 });
 
-app.post('/webhook', (req, res) => {
-    // Code to handle the webhook will go here
-    console.log('Webhook received:', req.body);
-
-    // Send a response back to HitPay to confirm receipt
-    res.status(200).send('Webhook received');
-});
-
-app.post('/webhook', (req, res) => {
-    const secret = process.env.HITPAY_SECRET; // Your secret key from HitPay
-
-    // Assuming HitPay sends an HMAC in the headers
-    const hmacReceived = req.headers['hmac'];
+app.post('/payment-confirmation/webhook', (req, res) => {
+    const secret = process.env.HITPAY_SECRET; // Your secret key from HitPay dashboard
     const data = req.body;
 
-    // Generate HMAC from the received data
-    const payload = Object.keys(data).sort().map(key => `${key}=${data[key]}`).join('&');
-    const hmacGenerated = crypto.createHmac('sha256', secret)
-                                .update(payload)
-                                .digest('hex');
+    // Verify the HMAC to ensure the webhook is from HitPay
+    const generatedHmac = generateSignature(data, secret);
 
-    if (hmacReceived === hmacGenerated) {
+    // HitPay sends an HMAC header to verify the source
+    const receivedHmac = req.headers['hmac'];
+
+    if (receivedHmac === generatedHmac) {
         console.log('Webhook verified successfully');
-        // Process the payment here (e.g., update database)
-        res.status(200).send('Webhook received and verified');
+
+        // Handle confirmed payment status
+        if (data.status === 'completed') {
+            // Mark your order as paid in your database or perform other business logic
+            console.log('Payment confirmed for payment_id:', data.payment_id);
+
+            // Respond to HitPay to acknowledge receipt of the webhook
+            res.status(200).send('Webhook received and processed');
+        } else {
+            console.log('Payment not confirmed:', data.status);
+            res.status(200).send('Webhook received but payment not confirmed');
+        }
     } else {
         console.log('Webhook verification failed');
         res.status(400).send('Invalid webhook signature');
     }
 });
+
+function generateSignature(data, secret) {
+    const sortedKeys = Object.keys(data).sort();
+    const payload = sortedKeys.filter(key => key !== 'hmac').map(key => `${key}${data[key]}`).join('');
+    const hmac = crypto.createHmac('sha256', secret);
+    return hmac.update(payload).digest('hex');
+}
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
