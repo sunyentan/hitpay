@@ -55,41 +55,30 @@ app.get('/create-payment', async (req, res) => {
     }
 });
 
+app.use(express.json({
+    verify: (req, res, buf) => {
+        req.rawBody = buf;
+    }
+}));
+
 app.post('/payment-confirmation/webhook', (req, res) => {
     const secret = process.env.HITPAY_SECRET; // Your secret key from HitPay dashboard
-    const data = req.body;
-
-    // Verify the HMAC to ensure the webhook is from HitPay
-    const generatedHmac = generateSignature(data, secret);
-
-    // HitPay sends an HMAC header to verify the source
-    const receivedHmac = req.headers['hmac'];
+    const receivedHmac = req.headers['hitpay-signature'];
+    const generatedHmac = generateSignature(req.rawBody, secret);
 
     if (receivedHmac === generatedHmac) {
         console.log('Webhook verified successfully');
-
-        // Handle confirmed payment status
-        if (data.status === 'completed') {
-            // Mark your order as paid in your database or perform other business logic
-            console.log('Payment confirmed for payment_id:', data.payment_id);
-
-            // Respond to HitPay to acknowledge receipt of the webhook
-            res.status(200).send('Webhook received and processed');
-        } else {
-            console.log('Payment not confirmed:', data.status);
-            res.status(200).send('Webhook received but payment not confirmed');
-        }
+        // Additional processing...
     } else {
         console.log('Webhook verification failed');
         res.status(400).send('Invalid webhook signature');
     }
 });
 
-function generateSignature(data, secret) {
-    const sortedKeys = Object.keys(data).sort();
-    const payload = sortedKeys.filter(key => key !== 'hmac').map(key => `${key}${data[key]}`).join('');
+function generateSignature(rawBody, secret) {
     const hmac = crypto.createHmac('sha256', secret);
-    return hmac.update(payload).digest('hex');
+    hmac.update(rawBody.toString());
+    return hmac.digest('hex');
 }
 
 app.listen(PORT, () => {
