@@ -1,6 +1,6 @@
 function requestPayment() {
     document.getElementById('payNowButton').style.display = 'none';
-    
+
     fetch('/create-payment')
         .then(response => {
             if (!response.ok) {
@@ -32,20 +32,6 @@ function requestPayment() {
         });
 }
 
-
-function checkPaymentStatus(paymentId) {
-    fetch(`/check-payment-status/${paymentId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'confirmed') {
-                window.location.href = 'https://nanast.com/'; // Redirect URL
-            } else {
-                console.log('Payment not confirmed yet. Checking again...');
-                setTimeout(() => checkPaymentStatus(paymentId), 5000); // Check every 5 seconds
-            }
-        })
-        .catch(error => console.error('Error checking payment status:', error));
-}
 
 // Add this line inside your requestPayment function after QR code is displayed
 // Assuming you store paymentId from the server's response
