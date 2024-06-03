@@ -1,4 +1,6 @@
 function requestPayment() {
+    document.getElementById('payNowButton').style.display = 'none';
+    
     fetch('/create-payment')
         .then(response => {
             if (!response.ok) {
