@@ -1,16 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Payment QR Code</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/minstyle.io@2.0.1/dist/css/minstyle.io.min.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="script.js"></script>
 </head>
 <body>
-    <h1>QR Code Payment</h1>
-    <div id="qrCode"></div>
-    <button onclick="requestPayment()">Pay Now</button>
-    <script src="redirectUser.js"></script>
-    <script src="app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-</body>
-</html>
+    
+    <div class="container">
+        <div class="row">
+          <div class="col-sm"></div>
+          <div class="col-sm">
+            <h2 class="ms-text-center">New World's End</h2>
+            <h4 class="ms-text-center">Virtual Audio Tour</h4>
+            <div class="ms-text-center pb-2">
+              <div class="ms-label ms-large ms-action2 ms-light">$5 SGD</div>
+            </div>
+            <div id="alerts" class="ms-text-center"></div>
+            <div id="loading" class="spinner-container ms-div-center">
+              <div class="spinner"></div>
+            </div>
+            <div id="content" class="hide">
+              <div class="ms-card ms-fill">
+                <div class="ms-card-content">
+                  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js" ></script>
+                </div>
+              </div>
+              <div id="qrCode"></div>
+            <button onclick="requestPayment()">Pay Now</button>
+            <script src="redirectUser.js"></script>
+            <script src="app.js"></script>
+            </div>
+          </div>
+          <div class="col-sm"></div>
+        </div>
+      </div>
+    </body>
+  </html>
